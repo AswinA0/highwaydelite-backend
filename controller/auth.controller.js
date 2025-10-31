@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import redisClient from "../config/redis.js";
+import getRedisClient from "../config/redis.js";
 import { ErrorHandler } from "../error.js";
 import prisma from "../config/db.js";
 import { sendVerificationEmail } from "../services/sendEmail.js";
@@ -13,6 +13,7 @@ export const req_email_verification = async (req, res, next) => {
     return next(err);
   }
   try {
+    const redisClient = await getRedisClient();
     const hash = crypto.randomBytes(32).toString("hex");
     await redisClient.setEx(`email_verification_${email}`, 3600, hash);
     await sendVerificationEmail(email, hash);
@@ -29,6 +30,7 @@ export const verifyEmail = async (req, res, next) => {
     return next(err);
   }
   try {
+    const redisClient = await getRedisClient();
     const userData = await redisClient.get(`verify:${token}`);
     if (!userData) {
       const err = new ErrorHandler(400, "Invalid or expired verification link");
@@ -93,6 +95,7 @@ export const register = async (req, res, next) => {
       return next(err);
     }
 
+    const redisClient = await getRedisClient();
     const verificationToken = crypto.randomBytes(32).toString("hex");
     await redisClient.setEx(
       `verify:${verificationToken}`,

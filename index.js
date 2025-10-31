@@ -24,3 +24,6 @@ app.use("/api/experiences", packagesRouter);
 app.use("/api/order", orderRouter);
 
 app.use(ErrorHandlingMiddleWare);
+
+// Export for Vercel serverless
+export default app;
