@@ -1,0 +1,101 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum paymentMethodType {
+  online
+  cash
+  splitPaymentOnline
+}
+
+enum statusType {
+  pending
+  completed
+  failed
+}
+model User {
+  id Int @unique @id @default(autoincrement())
+  username String
+  email String @unique
+  password String
+  role String @default("user")
+  createdAt DateTime @default(now())
+  favourites Package[] @relation("favs")
+  orders Order[]
+}
+
+model Order{
+  id Int @unique @id @default(autoincrement())
+  userId Int 
+  user User @relation(fields: [userId],references: [id]) 
+  packageId Int 
+  package Package @relation(fields: [packageId],references: [id])
+  start DateTime
+  end DateTime?
+  numberOfPeople Int @default(1)
+  totalPrice Float
+  yourPrice Float
+  status String @default("pending")
+  paymentMethod paymentMethodType
+  completed Boolean @default(false)
+  transaction Transaction[]
+  review Review? 
+}
+
+model Transaction{
+  id Int @unique @id @default(autoincrement())
+  orderId Int 
+  order Order @relation(fields: [orderId],references: [id])
+  amount Float
+  paymentMethod paymentMethodType
+  transactionDate DateTime @default(now())
+  status statusType
+}
+
+model Review{
+  id Int @unique @id @default(autoincrement())
+  orderId Int @unique
+  order Order @relation(fields: [orderId],references: [id])
+  packageId Int 
+  package Package @relation(fields: [packageId], references: [id])
+  ratings Float
+  review String
+}
+
+model Package{
+  id Int @unique @id @default(autoincrement())
+  title String
+  description String
+  price Float 
+  location String
+  duration Int @default(1)
+  availableSlots Int @default(10)
+  itinerary String?
+  inclusions String?
+  exclusions String?
+  thumbnailImages String[]
+  favouritesOf User[] @relation("favs")
+  orders Order[]
+  coupons Coupon[]
+  reviews Review[]
+  preferedPaymentMethod paymentMethodType[]
+
+}
+
+model Coupon{
+  id Int @unique @id @default(autoincrement())
+  packageId Int
+  package Package @relation(fields: [packageId], references: [id])
+  code String @unique
+  discountPercentage Float
+  validFrom DateTime
+  validUntil DateTime
+}
+
+
