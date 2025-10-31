@@ -8,7 +8,6 @@ import { router as orderRouter } from "./routes/order.routes.js";
 import { ErrorHandlingMiddleWare } from "./middleware/errorHandlingMiddleware.js";
 import cors from "cors";
 const app = express();
-const PORT = process.env.PORT || 3000;
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
@@ -25,6 +24,3 @@ app.use("/api/experiences", packagesRouter);
 app.use("/api/order", orderRouter);
 
 app.use(ErrorHandlingMiddleWare);
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
-});
